@@ -1,12 +1,16 @@
 'use client'
 
-import { Globe, Youtube, FileText, Link as LinkIcon, Music, Image as ImageIcon } from 'lucide-react'
+import { Globe, Youtube, FileText, Link as LinkIcon, Music, Image as ImageIcon, Star, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 
 interface BookmarkCardProps {
   id: string
   title: string
   url: string
   category: string
+  isFavorite?: boolean
+  onFavoriteToggle?: (id: string, newValue: boolean) => void
+  onDelete?: (id: string) => void
 }
 
 function getIconForUrl(url: string) {
@@ -27,9 +31,11 @@ function getIconForUrl(url: string) {
   }
 }
 
-export function BookmarkCard({ id, title, url, category }: BookmarkCardProps) {
+export function BookmarkCard({ id, title, url, category, isFavorite = false, onFavoriteToggle, onDelete }: BookmarkCardProps) {
+  const [hovered, setHovered] = useState(false)
+  const [favorite, setFavorite] = useState(isFavorite)
   const truncatedUrl = url.length > 50 ? url.substring(0, 47) + '...' : url
-  
+
   const categoryColors: Record<string, string> = {
     Work: 'bg-blue-100 text-blue-700',
     Personal: 'bg-pink-100 text-pink-700',
@@ -39,12 +45,28 @@ export function BookmarkCard({ id, title, url, category }: BookmarkCardProps) {
     Other: 'bg-gray-100 text-gray-700',
   }
 
+  const handleStarClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setFavorite((prev) => {
+      const newValue = !prev
+      onFavoriteToggle?.(id, newValue)
+      return newValue
+    })
+  }
+
+  const handleDeleteClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    onDelete?.(id)
+  }
+
   return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="block p-4 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow bg-white"
+      className="block p-4 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow bg-white relative"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0 mt-1">
@@ -59,6 +81,25 @@ export function BookmarkCard({ id, title, url, category }: BookmarkCardProps) {
             </span>
           </div>
         </div>
+        {/* Hover icons */}
+        {hovered && (
+          <div className="absolute top-2 right-4 flex gap-2 z-20">
+            <button
+              title={favorite ? 'Remove from favorites' : 'Add to favorites'}
+              onClick={handleStarClick}
+              className="p-1 rounded-full hover:bg-yellow-100 focus:outline-none"
+            >
+              <Star className={`w-6 h-6 ${favorite ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'}`} fill={favorite ? '#facc15' : 'none'} />
+            </button>
+            <button
+              title="Delete bookmark"
+              onClick={handleDeleteClick}
+              className="p-1 rounded-full hover:bg-red-100 focus:outline-none"
+            >
+              <Trash2 className="w-6 h-6 text-red-400" />
+            </button>
+          </div>
+        )}
       </div>
     </a>
   )

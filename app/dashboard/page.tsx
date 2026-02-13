@@ -13,6 +13,7 @@ interface Bookmark {
   url: string
   category: string
   created_at: string
+  is_favorite?: boolean
 }
 
 export default function DashboardPage() {
@@ -81,6 +82,32 @@ export default function DashboardPage() {
                            bookmark.category === filterCategory
     return matchesSearch && matchesCategory
   })
+
+  const handleFavoriteToggle = async (id: string, newValue: boolean) => {
+    try {
+      await fetch('/api/bookmarks', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, is_favorite: newValue }),
+      })
+      setBookmarks((prev) => prev.map(b => b.id === id ? { ...b, is_favorite: newValue } : b))
+    } catch (error) {
+      console.error('Error updating favorite:', error)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await fetch('/api/bookmarks', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      setBookmarks((prev) => prev.filter(b => b.id !== id))
+    } catch (error) {
+      console.error('Error deleting bookmark:', error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -165,6 +192,9 @@ export default function DashboardPage() {
                 title={bookmark.title}
                 url={bookmark.url}
                 category={bookmark.category}
+                isFavorite={bookmark.is_favorite}
+                onFavoriteToggle={handleFavoriteToggle}
+                onDelete={handleDelete}
               />
             ))}
           </div>

@@ -10,7 +10,7 @@ interface AddBookmarkModalProps {
   onBookmarkAdded: () => void
 }
 
-const CATEGORIES = ['Work', 'Personal', 'Reading', 'Shopping', 'Social', 'Other']
+const CATEGORIES = ['Work','Favorites' , 'Personal', 'Reading', 'Shopping', 'Social', 'Other']
 
 export function AddBookmarkModal({
   isOpen,
